@@ -1,0 +1,22 @@
+{
+  "name": "directorywalker",
+  "version": "1.0.0",
+  "description": "This script will return an array of all files and subfiles in a directory.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rburckner/directoryWalker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rburckner/directoryWalker/issues"
+  },
+  "homepage": "https://github.com/rburckner/directoryWalker#readme",
+  "dependencies": {
+    "debug": "^4.3.2"
+  }
+}
