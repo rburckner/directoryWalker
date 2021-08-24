@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 let files = [];
-let omitDuplicates = true;
+let _omitDuplicates = true;
 
 function readTree(entry) {
   let stat = fs.statSync(entry);
@@ -13,7 +13,7 @@ function readTree(entry) {
       readTree(path.join(entry, file));
     });
   } else {
-    if (omitDuplicates && !files.includes(entry)) {
+    if (_omitDuplicates && !files.includes(entry)) {
       debug(`Adding: '${entry}'.`);
       files.push(entry);
     } else {
@@ -23,7 +23,27 @@ function readTree(entry) {
   }
 }
 
-module.exports = function (entry, omitDuplicates = true) {
+function SearchForEmptyDirectories(entry) {
+  let stat = fs.statSync(entry);
+  if (stat.isDirectory()) {
+    debug(`Directory Found: ${entry}.`);
+    const contents = fs.readdirSync(entry);
+    if (contents.length === 0) {
+      debug(`'entry' is EMPTY`);
+      files.push(entry);
+    } else {
+      contents.forEach((file) => {
+        SearchForEmptyDirectories(path.join(entry, file));
+      });
+    }
+  }
+}
+
+module.exports = function (
+  entry,
+  omitDuplicates = true,
+  emptyDirectory = false
+) {
   if (typeof entry !== "string") {
     throw new Error(
       `Function's first parameter requires a resolved directory path.`
@@ -31,6 +51,10 @@ module.exports = function (entry, omitDuplicates = true) {
   }
   if (typeof omitDuplicates !== "boolean") {
     throw new Error(`Function's second parameter must be a boolean value.`);
+  }
+  _omitDuplicates = omitDuplicates;
+  if (typeof emptyDirectory !== "boolean") {
+    throw new Error(`Function's third parameter must be a boolean value.`);
   }
 
   const entryStats = fs.statSync(entry);
@@ -41,6 +65,12 @@ module.exports = function (entry, omitDuplicates = true) {
   debug(`Clearing file array and starting recursive directory index.`);
   debug(`Duplicate files are: ${omitDuplicates ? "omitted" : "included"}.`);
   files = [];
-  readTree(entry);
-  return files;
+
+  if (emptyDirectory) {
+    SearchForEmptyDirectories(entry);
+    return files;
+  } else {
+    readTree(entry);
+    return files;
+  }
 };
